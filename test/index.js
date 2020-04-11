@@ -3,6 +3,7 @@ const supertest = require("supertest");
 // supertest will run on localhost 8080
 const request = supertest("http://localhost:8080");
 const app = require("../src/server");
+const repository = require("../src/repository");
 
 let server;
 
@@ -30,9 +31,26 @@ describe("HTTP API", () => {
         });
     });
   });
-
+  describe("POST /notes", () => {
+    it("should return status code 302 and redirect", () => {
+      return request
+        .post("/notes")
+        .send("textField=My first note here")
+        .expect(302)
+        .expect("location", "/notes");
+    });
+    it("should display the new note on the notes page", () => {
+      return request.get("/notes").expect((res) => {
+        if (!res.text.includes("My first note here")) {
+          throw new Error("new note not found");
+        }
+      });
+    });
+  });
   //after all tests we need to close server
   after(() => {
     server.close();
   });
+  after((callback) => repository.deleteAll(callback));
+  after((callback) => repository.closeConnection(callback));
 });
