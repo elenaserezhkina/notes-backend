@@ -14,7 +14,12 @@
     Notes
     <ul>
       <% notes.forEach(function(note){ %>
-      <li><%= note.text %></li>
+      <li>
+        <%= note.text %>
+        <form method="post" action="/notes/<%= note.id%>?_method=DELETE">
+          <button type="submit">delete</button>
+        </form>
+      </li>
       <% }); %>
     </ul>
   </body>

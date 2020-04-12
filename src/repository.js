@@ -23,4 +23,10 @@ module.exports = {
   closeConnection(callback) {
     connection.end(callback);
   },
+  deleteOne(id, callback) {
+    // callback is always the last argument
+    connection.query("DELETE FROM notes WHERE id = ?", [id], (err) => {
+      callback(err);
+    });
+  },
 };

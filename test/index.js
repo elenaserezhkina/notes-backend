@@ -47,6 +47,48 @@ describe("HTTP API", () => {
       });
     });
   });
+  describe("DELETE /notes/:id", () => {
+    let lastUrl;
+    const createPost = async () => {
+      //await till this post executes and sends something
+      await request.post("/notes").send("textField=Will be deleted");
+      const response = await request.get("/notes");
+      const urls = response.text.match(/\/notes\/\d+/g);
+      lastUrl = urls[urls.length - 1];
+    };
+
+    //context is same as describe but with different meaning. It's condition with which test is running
+    context("When using method delete", () => {
+      before(createPost);
+      it("should return status 302 delete note with id and redirect", () => {
+        return request.delete(lastUrl).expect(302).expect("location", "/notes");
+      });
+      it("should check that the note was deleted", () => {
+        return request.get("/notes").expect((res) => {
+          if (res.text.includes("Will be deleted")) {
+            throw new Error("deleted note found");
+          }
+        });
+      });
+    });
+    context("When using method post", () => {
+      before(createPost);
+      it("should return status 302 delete note with id and redirect", () => {
+        return request
+          .post(lastUrl)
+          .query("_method=DELETE")
+          .expect(302)
+          .expect("location", "/notes");
+      });
+      it("should check that the note was deleted", () => {
+        return request.get("/notes").expect((res) => {
+          if (res.text.includes("Will be deleted")) {
+            throw new Error("deleted note found");
+          }
+        });
+      });
+    });
+  });
   //after all tests we need to close server
   after(() => {
     server.close();
