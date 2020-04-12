@@ -1,6 +1,7 @@
 // connect express library
 const express = require("express");
 const bodyParser = require("body-parser");
+const methodOverride = require("method-override");
 const repository = require("./repository");
 
 // to make express application
@@ -10,6 +11,7 @@ app.set("view engine", "ejs"); // who will render
 
 //to use middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 
 // add route to app
 app.get("/notes", (req, res) => {
@@ -30,5 +32,13 @@ app.post("/notes", (req, res) => {
     res.redirect("/notes");
   });
 });
-
+app.delete("/notes/:id", (req, res) => {
+  repository.deleteOne(req.params.id, (err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("internal server error");
+    }
+    res.redirect("/notes");
+  });
+});
 module.exports = app;
